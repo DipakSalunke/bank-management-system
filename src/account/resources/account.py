@@ -1,6 +1,9 @@
+from resources.security import token_required
 from flask_restful import Resource,reqparse
+from flask import request
 from flask_jwt import jwt_required
-
+import requests
+import copy
 from models.account import AccountModel
 
 class Account(Resource):
@@ -17,8 +20,7 @@ class Account(Resource):
     parser.add_argument('contact', required=True, type=str, help='contact field cannot be blank')
     parser.add_argument('dob', required=True, type=str, help='date of birth cannot be blank')
     parser.add_argument('acc_type', required=True, type=str, help='account type cannot be blank')
-    
-    @jwt_required()
+    @token_required
     def get(self):
         parser1 = reqparse.RequestParser()
         parser1.add_argument('username', required=True, type=str, help='username cannot be blank')
@@ -27,23 +29,44 @@ class Account(Resource):
         if acc:
             return acc.json(),200
         return {'message':'Account not found'},400
-    
-    @jwt_required()
+    @token_required
     def put(self):
         data = Account.parser.parse_args()
         acc = AccountModel.find_by_username(data["username"])
-        if acc is None:
-            return {'message':'Account not found'},400
-        else:
-            acc.name = data["name"]
-            acc.address = data["address"]
-            acc.state = data["state"]
-            acc.country = data["country"]
-            acc.email = data["email"]
-            acc.pan = data["pan"]
-            acc.contact = data["contact"]
-            acc.dob = data["dob"]
-            acc.acc_type = data["acc_type"]
-        acc.save_to_db()
+        acc_before = copy.deepcopy(acc)
+        auth_token = request.headers.get('Authorization', '')
         
-        return acc.json(),201
+        if acc is None:
+            try:
+                url = 'http://127.0.0.1:5001/user/ispresent'
+                response= requests.post(url, data = {"username":data["username"]},headers={'Authorization':auth_token})
+            except Exception:
+                return "User service is not working try after some time",500
+            
+            if response.json()["is_present"]:
+                message="username exists insert acceppted"
+                acc = AccountModel(**data)
+                acc.save_to_db()
+            else:
+                return {"message":"user is not present, register first!"},400
+            
+            return {"message":message,"inserted":acc.json()},201
+        else:
+            acc = AccountModel(**data)
+            acc.save_to_db()
+            return {"before": acc_before.json(),"updated":acc.json()},201
+
+class AccountCheck(Resource):
+    
+    parser = reqparse.RequestParser()
+    
+    parser.add_argument('acc_id', required=True, type=str, help='acc_id cannot be blank')
+    @token_required
+    def post(self):
+        data = AccountCheck.parser.parse_args()
+        account = AccountModel.find_by_id(data['acc_id'])
+        if account:
+            return {"is_present":True,"username":account.username},200
+        else:
+            return {"is_present":False},400
+    

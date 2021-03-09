@@ -15,11 +15,6 @@ class AccountModel(db.Model):
     dob = db.Column(db.String(20))
     acc_type = db.Column(db.String(20))
     
-    username = db.Column(db.Integer,db.ForeignKey("users.username"))
-    user = db.relationship('UserModel')
-    
-    loans = db.relationship('LoanModel',lazy='dynamic')
-    
     def __init__(self,username,name,address,state,country,email,pan,contact,dob,acc_type):
         self.username = username
         self.name=name 
@@ -33,7 +28,7 @@ class AccountModel(db.Model):
         self.acc_type=acc_type 
         
     def json(self):
-        return {'username':self.username,"name":self.name,"address":self.address,"state":self.state,"country":self.country,"email":self.email,"pan":self.pan,"contact":self.contact,"dob":self.dob,"acc_type":self.acc_type,"userpass":self.user.password}   
+        return {'username':self.username,"name":self.name,"address":self.address,"state":self.state,"country":self.country,"email":self.email,"pan":self.pan,"contact":self.contact,"dob":self.dob,"acc_type":self.acc_type}   
     
     def save_to_db(self):
         db.session.add(self)

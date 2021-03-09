@@ -10,8 +10,7 @@ class LoanModel(db.Model):
     rate_of_int = db.Column(db.Float(3))
     duration = db.Column(db.Float(50))
     
-    acc_id = db.Column(db.Integer,db.ForeignKey("accounts.id"))
-    acc = db.relationship('AccountModel')
+    acc_id = db.Column(db.Integer)
     
     def __init__(self,date,acc_id,loan_type,loan_amt,rate_of_int,duration):
         self.acc_id = acc_id
