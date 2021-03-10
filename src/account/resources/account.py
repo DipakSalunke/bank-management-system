@@ -37,12 +37,7 @@ class Account(Resource):
         auth_token = request.headers.get('Authorization', '')
         
         if acc is None:
-            try:
-                url = 'http://127.0.0.1:5001/user/ispresent'
-                response= requests.post(url, data = {"username":data["username"]},headers={'Authorization':auth_token})
-            except Exception:
-                return "User service is not working try after some time",500
-            
+            response = self.check_for_user(data, auth_token)
             if response.json()["is_present"]:
                 message="username exists insert acceppted"
                 acc = AccountModel(**data)
@@ -55,6 +50,14 @@ class Account(Resource):
             acc = AccountModel(**data)
             acc.save_to_db()
             return {"before": acc_before.json(),"updated":acc.json()},201
+
+    def check_for_user(self, data, auth_token):
+        try:
+            url = 'http://127.0.0.1:5001/user/ispresent'
+            response= requests.post(url, data = {"username":data["username"]},headers={'Authorization':auth_token})
+        except Exception:
+            response= "User service is not working try after some time",500
+        return response
 
 class AccountCheck(Resource):
     

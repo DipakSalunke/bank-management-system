@@ -1,7 +1,33 @@
+
+
 import pytest
+from requests import Response
+from functools import wraps
+from mock import patch
+from db import db
+
+
+def decorator(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+patch('resources.security.token_required', decorator).start()
+
+the_response = Response()
+the_response.status_code = 400
+the_response._content = b'{"is_present": "True"}'
+
+patch('resources.account.Account.check_for_user',
+      return_value=the_response).start()
 from app import app
-import requests
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///datatest.db"
+db.init_app(app)
+
 tester = app.test_client()
+
 headers = ''
 account = {
     "username": "dipak",
@@ -23,21 +49,9 @@ account4 = {"contact": "43636346", }
 account4.update(account)
 
 
-
-class TestUserLogin:
-    def test_auth_success(self):
-        response = requests.post(
-            'http://127.0.0.1:5001/login', json={"username": "dipak", "password": "dipak12"})
-        status = response.status_code
-        print(response.json)
-        assert status == 200
-        global headers
-        headers = {'Authorization': 'Bearer {}'.format(
-            response.json()["access_token"])}
-
-
 class TestAccount:
     url = '/account'
+
     def test_create_account(self):
         response = tester.put(self.url, data=account, headers=headers)
         status = response.status_code
@@ -77,3 +91,20 @@ class TestAccountCheck:
         status = response.status_code
         print(response.json)
         assert status == 200
+        
+        clear()
+        
+def clear():
+    import os
+    os.remove("./src/account/datatest.db")
+        
+""" class TestUserLogin:
+    def test_auth_success(self):
+        response = requests.post(
+            'http://127.0.0.1:5001/login', json={"username": "dipak", "password": "dipak12"})
+        status = response.status_code
+        print(response.json)
+        assert status == 200
+        global headers
+        headers = {'Authorization': 'Bearer {}'.format(
+            response.json()["access_token"])} """

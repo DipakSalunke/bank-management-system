@@ -4,7 +4,7 @@ import requests
 from datetime import datetime
 from models.loan import LoanModel
 from json import dumps
-
+from flask import request
 
 class Loan(Resource):
     #method_decorators = {'get': [token_required]}
@@ -36,16 +36,23 @@ class Loan(Resource):
     def post(self):
         data = Loan.parser.parse_args()
         loan = LoanModel(str(datetime.utcnow()), **data)
+        auth_token = request.headers.get('Authorization', '')
+        response = self.check_for_acc(data, auth_token)
+        if 500 in response:
+            return response
+        print(response.json())
+        if response =="True":
+            message = "Account exists loan acceppted"
+            loan.save_to_db()
+            return {"message": message, "username": response.json()["username"], "Approved Loan": loan.json()}, 201
+        else:
+            return {"message": "You need account to get a loan, register first!"},401
+        
+
+    def check_for_acc(self, data, auth_token):
         try:
             url = 'http://127.0.0.1:5002/account/ispresent'
-            print("hello")
-            response = requests.post(url, data={"acc_id": data["acc_id"]})
-            print(response.text)
-            if response.json()["is_present"]:
-                message = "Account exists loan acceppted"
-                loan.save_to_db()
-                return {"message": message, "username": x.json()["username"], "Approved Loan": loan.json()}, 201
-            else:
-                return {"message": "You need account to get a loan, register first!"}
-        except:
-            return "Account service is not working try after some time"
+            response = requests.post(url, data={"acc_id": data["acc_id"]},headers={'Authorization':auth_token})
+        except Exception:
+            response =  "Account service is not working try after some time",500
+        return response
