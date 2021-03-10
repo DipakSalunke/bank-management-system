@@ -1,6 +1,8 @@
 import pytest
-from reg_run import app
-
+from db import db
+from app import app
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///datatest.db"
+db.init_app(app)
 tester = app.test_client()
 headers = ''
 headers_ref = ''
@@ -132,3 +134,9 @@ class TestRefresh:
         status = response.status_code
         print(response.json)
         assert status == 200
+        
+        clear()
+
+def clear():
+    import os
+    os.remove("./datatest.db")
