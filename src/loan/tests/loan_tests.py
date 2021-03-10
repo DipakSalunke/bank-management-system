@@ -12,13 +12,13 @@ def decorator(f):
     def decorated_function(*args, **kwargs):
         return f(*args, **kwargs)
     return decorated_function
-
+ 
 
 patch('resources.security.token_required', decorator).start()
 
 the_response = Response()
 the_response.status_code = 400
-the_response._content = b'{"is_present":"True","username":"test"}'
+
 
 check = patch('resources.loan.Loan.check_for_acc', return_value=the_response)
 
@@ -43,6 +43,7 @@ class TestLoan:
     url = '/loan'
 
     def test_create_loan(self):
+        the_response._content = b'{"is_present":true,"username":"test"}'
         check.start()
         response = tester.post(self.url, data=loan_details)
         status = response.status_code
@@ -50,7 +51,7 @@ class TestLoan:
         assert status == 201
         
     def test_create_loan_not_a_user(self):
-        the_response._content = b'{"is_present":"False","username":""}'
+        the_response._content = b'{"is_present":false}'
         check.start()
         response = tester.post(self.url, data=loan_details)
         status = response.status_code
@@ -58,12 +59,18 @@ class TestLoan:
         assert status == 401
     
     def test_get_loan(self):
-        response = tester.get(self.url, data={'acc_id':1})
+        response = tester.get(self.url, data={'acc_id':'1'})
         status = response.status_code
         print(response.json)
         assert status == 200
+        
     def test_get_loan_acc_unavailable(self):
-        response = tester.get(self.url, data={'acc_id':1})
+        response = tester.get(self.url, data={'acc_id':'13'})
         status = response.status_code
         print(response.json)
         assert status == 404
+        clear()
+
+def clear():
+    import os
+    os.remove("./datatest.db")

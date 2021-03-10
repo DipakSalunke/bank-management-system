@@ -6,8 +6,14 @@ from models.loan import LoanModel
 from json import dumps
 from flask import request
 
-class Loan(Resource):
-    #method_decorators = {'get': [token_required]}
+import logging
+
+logging.basicConfig(filename='record.log', level=logging.DEBUG,
+                    format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
+log = logging.getLogger()
+
+
+class Loan(Resource): 
     parser = reqparse.RequestParser()
 
     parser.add_argument('acc_id', required=True, type=str,
@@ -27,10 +33,18 @@ class Loan(Resource):
         parser1.add_argument('acc_id', required=True,
                              type=int, help='account id cannot be blank')
         data = parser1.parse_args()
+        
+        log.debug("acc_id: %s", data["acc_id"])
+        
         loans = LoanModel.find_by_accid(data["acc_id"])
-        if loans:
-            return {"loans": [loan.json() for loan in loans]}, 200
-        return {'message': 'Loans not found for given account'}, 404
+        loans = [loan.json() for loan in loans]
+        
+        log.debug("loans %s",loans)
+        
+        if len(loans) > 0:
+            return {"loans": loans}, 200
+        else:
+            return {'message': 'Loans not found for given account'}, 404
 
     @token_required
     def post(self):
@@ -38,21 +52,23 @@ class Loan(Resource):
         loan = LoanModel(str(datetime.utcnow()), **data)
         auth_token = request.headers.get('Authorization', '')
         response = self.check_for_acc(data, auth_token)
-        if 500 in response:
+        
+        log.info("response %s",response.json())
+        
+        if response.status_code == 500:
             return response
-        print(response.json())
-        if response =="True":
+        if response.json()["is_present"]:
             message = "Account exists loan acceppted"
             loan.save_to_db()
             return {"message": message, "username": response.json()["username"], "Approved Loan": loan.json()}, 201
         else:
-            return {"message": "You need account to get a loan, register first!"},401
-        
+            return {"message": "You need account to get a loan, register first!"}, 401
 
     def check_for_acc(self, data, auth_token):
         try:
             url = 'http://127.0.0.1:5002/account/ispresent'
-            response = requests.post(url, data={"acc_id": data["acc_id"]},headers={'Authorization':auth_token})
+            response = requests.post(url, data={"acc_id": data["acc_id"]}, headers={
+                                     'Authorization': auth_token})
         except Exception:
-            response =  "Account service is not working try after some time",500
+            return "Account service is not working try after some time", 500
         return response
