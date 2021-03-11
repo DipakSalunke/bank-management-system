@@ -8,9 +8,9 @@ from flask import request,jsonify
 
 import logging
 
-logging.basicConfig(filename='./src/loan/record.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/loan/loan.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
-log = logging.getLogger()
+log = logging.getLogger("loan_log")
 
 
 class Loan(Resource): 

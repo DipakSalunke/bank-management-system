@@ -39,7 +39,8 @@ class TestCustRegister:
 
 
 class TestUserRegister:
-    url ='/register/user'
+    url = '/register/user'
+
     def test_post(self):
         res = tester.post(self.url, data=user)
         assert res.status_code == 201
@@ -51,7 +52,8 @@ class TestUserRegister:
     def test_post_check(self):
         res = tester.post(self.url, data=user2)
         assert res.status_code == 201
-        
+
+
 class TestUserLogin:
     def test_auth_success(self):
         response = tester.post(
@@ -128,14 +130,14 @@ class TestUserLogout:
 
 
 class TestRefresh:
-    def test_Refresh(self):
+    def test_refresh(self):
         response = tester.post(
             '/refresh', headers=headers_ref)
         status = response.status_code
-        print(response.json)
         assert status == 200
-        
+
         clear()
+
 
 def clear():
     import os

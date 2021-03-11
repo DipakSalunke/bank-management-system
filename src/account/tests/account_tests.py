@@ -1,5 +1,4 @@
 
-
 import pytest
 from requests import Response
 from functools import wraps
@@ -55,32 +54,27 @@ class TestAccount:
     def test_create_account(self):
         response = tester.put(self.url, data=account, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 201
 
     def test_create_account_not_a_user(self):
         response = tester.put(self.url, data=account2, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 400
 
     def test_create_account_is_a_user(self):
         response = tester.put(self.url, data=account3, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 201
 
     def test_update_account(self):
         response = tester.put(self.url, data=account4, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 201
 
     def test_get_account(self):
         response = tester.get(
             self.url, data={"username": "dipak"}, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 200
 
 
@@ -89,21 +83,21 @@ class TestAccountCheck:
         response = tester.post('/account/ispresent',
                                data={"acc_id": 1}, headers=headers)
         status = response.status_code
-        print(response.json)
         assert status == 200
-        
+
         clear()
-        
+
+
 def clear():
     import os
     os.remove("./src/account/datatest.db")
-        
+
+
 """ class TestUserLogin:
     def test_auth_success(self):
         response = requests.post(
             'http://127.0.0.1:5001/login', json={"username": "dipak", "password": "dipak12"})
         status = response.status_code
-        print(response.json)
         assert status == 200
         global headers
         headers = {'Authorization': 'Bearer {}'.format(

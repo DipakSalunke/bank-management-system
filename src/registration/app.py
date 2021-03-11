@@ -12,7 +12,7 @@ from resources.user import (CustRegister,
 
 ACCESS_EXPIRES = timedelta(hours=1)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///data.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # flask jwt can raise its own exceptions and errors
