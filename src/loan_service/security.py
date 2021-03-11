@@ -3,7 +3,7 @@ from flask import request
 import requests
 import logging
 
-logging.basicConfig(filename='./src/account/account.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/loan_service/loan.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
 log = logging.getLogger("security_log")
 
@@ -13,8 +13,8 @@ def token_required(f):
         # Make endpoint in the Auth Service to validate an Auth Token
         auth_token = request.headers.get('Authorization', '')
         try:
-            response = requests.get('http://127.0.0.1:5001/login', headers={'Authorization':auth_token})
-            log.info("authenticated successfully! %s",response)
+            response = requests.get('http://127.0.0.1:5001/user/login', headers={'Authorization':auth_token})
+            log.info("authentication response %s",response)
             
         except Exception:
             log.critical("auth service is down")

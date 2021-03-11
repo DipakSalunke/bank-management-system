@@ -15,7 +15,7 @@ def decorator(f):
     return decorated_function
 
 
-patch('resources.security.token_required', decorator).start()
+patch('security.token_required', decorator).start()
 
 the_response = Response()
 the_response.status_code = 400
@@ -69,4 +69,4 @@ class TestLoan:
 
 def clear():
     import os
-    os.remove("./src/loan/datatest.db")
+    os.remove("./src/loan_service/datatest.db")

@@ -3,8 +3,7 @@ from flask_restful import Api
 from datetime import timedelta
 from db import db
 from security import jwt
-from resources.user import (CustRegister,
-                            UserRegister,
+from resources.user import (UserRegister,
                             UserCheck, User,
                             UserLogin,
                             TokenRefresh,
@@ -36,13 +35,12 @@ jwt.init_app(app)
 
 # Adds a resource to the api.
 
-api.add_resource(CustRegister, "/register/customer")
-api.add_resource(UserRegister, "/register/user")
+api.add_resource(UserRegister, "/user/register")
 api.add_resource(UserCheck, "/user/ispresent")
 api.add_resource(User, "/user/<int:user_id>")
-api.add_resource(UserLogin, "/login")
-api.add_resource(TokenRefresh, "/refresh")
-api.add_resource(UserLogout, "/logout")
+api.add_resource(UserLogin, "/user/login")
+api.add_resource(TokenRefresh, "/user/refresh")
+api.add_resource(UserLogout, "/user/logout")
 
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

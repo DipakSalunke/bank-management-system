@@ -6,47 +6,23 @@ db.init_app(app)
 tester = app.test_client()
 headers = ''
 headers_ref = ''
-cust = {
-    "username": "dipak",
-    "password": "dipak12",
-    "name": "dipak",
-    "address": "pune",
-    "state": "MH",
-    "country": "India",
-    "email": "abc@gmail.com",
-    "pan": "ACGD123",
-    "contact": "123456789",
-    "dob": "10-10-10",
-    "acc_type": "Savings"
-}
 
 user = {
     "username": "jen",
     "password": "jen12"}
 user2 = {
-    "username": "jenn",
-    "password": "jenn12"}
-
-
-class TestCustRegister:
-    def test_post_cust(self):
-        res = tester.post('/register/customer', data=cust)
-        assert res.status_code == 201
-
-    def test_post_check(self):
-        res = tester.post('/register/customer', data=cust)
-        assert res.status_code == 400
-
+    "username": "dipak",
+    "password": "dipak12"}
 
 class TestUserRegister:
-    url = '/register/user'
+    url = 'user/register'
 
     def test_post(self):
         res = tester.post(self.url, data=user)
         assert res.status_code == 201
 
     def test_post_dup(self):
-        res = tester.post('/register/user', data=user)
+        res = tester.post(self.url, data=user)
         assert res.status_code == 400
 
     def test_post_check(self):
@@ -57,7 +33,7 @@ class TestUserRegister:
 class TestUserLogin:
     def test_auth_success(self):
         response = tester.post(
-            '/login', json={"username": "dipak", "password": "dipak12"})
+            '/user/login', json={"username": "dipak", "password": "dipak12"})
         status = response.status_code
         assert status == 200
         global headers
@@ -70,7 +46,7 @@ class TestUserLogin:
 
     def test_auth_failed(self):
         response = tester.post(
-            '/login', json={"username": "dipakk", "password": "dipak412"})
+            '/user/login', json={"username": "dipakk", "password": "dipak412"})
         status = response.status_code
         assert status == 401
 
@@ -102,6 +78,25 @@ class TestUser:
         status = response.status_code
         assert status == 404
 
+    def test_delete_not_admin(self):
+        response = tester.delete(
+            '/user/2', headers=headers)
+        status = response.status_code
+        assert status == 401
+        
+    def test_auth_for_admin(self):
+        response = tester.post(
+            '/user/login', json={"username": "jen", "password": "jen12"})
+        status = response.status_code
+        assert status == 200
+        global headers
+
+        headers = {'Authorization': 'Bearer {}'.format(
+            response.json["access_token"])}
+        global headers_ref
+        headers_ref = {'Authorization': 'Bearer {}'.format(
+            response.json["refresh_token"])}
+
     def test_delete(self):
         response = tester.delete(
             '/user/2', headers=headers)
@@ -124,7 +119,7 @@ class TestUser:
 class TestUserLogout:
     def test_logout(self):
         response = tester.post(
-            '/logout', headers=headers)
+            '/user/logout', headers=headers)
         status = response.status_code
         assert status == 200
 
@@ -132,7 +127,7 @@ class TestUserLogout:
 class TestRefresh:
     def test_refresh(self):
         response = tester.post(
-            '/refresh', headers=headers_ref)
+            '/user/refresh', headers=headers_ref)
         status = response.status_code
         assert status == 200
 
@@ -141,4 +136,4 @@ class TestRefresh:
 
 def clear():
     import os
-    os.remove("./src/registration/datatest.db")
+    os.remove("./src/user_service/datatest.db")

@@ -1,4 +1,4 @@
-from resources.security import token_required
+from security import token_required
 from flask_restful import Resource, reqparse
 from flask import request
 import requests
@@ -6,7 +6,7 @@ import copy
 from models.account import AccountModel
 import logging
 
-logging.basicConfig(filename='./src/account/account.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/account_service/account.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
 log = logging.getLogger("account_log")
 

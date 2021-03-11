@@ -6,7 +6,7 @@ from blacklist import BLACKLIST
 # used to add additional claims when creating a JWT.
 import logging
 
-logging.basicConfig(filename='./src/registration/registration.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/user_service/registration.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
 log = logging.getLogger("security_log")
 

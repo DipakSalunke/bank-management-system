@@ -13,7 +13,7 @@ def decorator(f):
     return decorated_function
 
 
-patch('resources.security.token_required', decorator).start()
+patch('security.token_required', decorator).start()
 
 the_response = Response()
 the_response.status_code = 400
@@ -90,15 +90,4 @@ class TestAccountCheck:
 
 def clear():
     import os
-    os.remove("./src/account/datatest.db")
-
-
-""" class TestUserLogin:
-    def test_auth_success(self):
-        response = requests.post(
-            'http://127.0.0.1:5001/login', json={"username": "dipak", "password": "dipak12"})
-        status = response.status_code
-        assert status == 200
-        global headers
-        headers = {'Authorization': 'Bearer {}'.format(
-            response.json()["access_token"])} """
+    os.remove("./src/account_service/datatest.db")

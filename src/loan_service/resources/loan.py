@@ -1,4 +1,4 @@
-from resources.security import token_required
+from security import token_required
 from flask_restful import Resource, reqparse
 import requests
 from datetime import datetime
@@ -8,7 +8,7 @@ from flask import request,jsonify
 
 import logging
 
-logging.basicConfig(filename='./src/loan/loan.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/loan_service/loan.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
 log = logging.getLogger("loan_log")
 

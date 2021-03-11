@@ -14,33 +14,32 @@ cd to bank-management-system folder
 install the last successful environment for run   
 ```pipenv install --ignore-pipfile```      
 run registration service   
-```python src\registration\app.py```   
+```python src\user_service\app.py```   
 run account service   
-```python src\account\app.py```   
+```python src\account_service\app.py```   
 run loan service   
-```python src\loan\app.py```   
+```python src\loan_service\app.py```   
 
 ### for dev
 install the last successful environment for developement   
 ```pipenv install --dev```     
 for testing   
 ```coverage run -m pytest <test_files_path>```   
-```coverage run -m pytest src/registration/tests/user_tests.py```  
-```coverage run -m pytest src/account/tests/account_tests.py```   
-```coverage run -m pytest src/loan/tests/loan_tests.py``` 
+```coverage run -m pytest src/user_service/tests/user_tests.py```  
+```coverage run -m pytest src/account_service/tests/account_tests.py```   
+```coverage run -m pytest src/loan_service/tests/loan_tests.py``` 
 
 check test coverage   
 ```coverage report -m```   
 
-registration service endpoints(port: 5001):
+user service endpoints(port: 5001):
 ```
-/register/customer [POST]
-/register/user [POST]
+/user/register [POST]
 /user/ispresent [POST]
 /user/<int:user_id> [GET, DELETE]
-/login [POST, GET]
-/refresh [POST]
-/logout [POST]
+/user/login [POST, GET]
+/user/refresh [POST]
+/user/logout [POST]
 ```  
    
 account service endpoints(port: 5002):

@@ -4,7 +4,6 @@ from flask import Response, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt, get_jwt_identity, jwt_required)
 from flask_restful import Resource, reqparse
-from models.account import AccountModel
 from models.user import UserModel
 from werkzeug.security import safe_str_cmp
 
@@ -22,82 +21,6 @@ _user_parser.add_argument('username', required=True, type=str,
                           help='username cannot be blank')
 _user_parser.add_argument('password', required=True, type=str,
                           help='password field cannot be blank')
-
-
-class CustRegister(Resource):
-    """class for customer registration"""
-
-    def post(self):
-        """registers a new user as well creates account for the same
-
-        Returns:
-            tuple: message, status_code
-        """
-        data = self.cust_parser().parse_args()
-        auth_token = request.headers.get('Authorization')
-        if UserModel.find_by_username(data['username']):
-            return {"message": "A user with that username already exists"}, 400
-        user = UserModel(data["username"], data["password"])
-        user.save_to_db()
-        log.info("user created:%s", user.json())
-        return {"message": "User created successfully", "account_call": self.save_to_acc(data,auth_token)}, 201
-
-    def save_to_acc(self, data,auth_token):
-        """sends post request to save account information to the Account service
-
-        Args:
-            data (Account): Account model data
-
-        Returns:
-            tuple: message and return code
-        """
-        account = AccountModel(data["username"], data["name"], data["address"], data["state"],
-                               data["country"], data["email"], data["pan"], data["contact"], data["dob"], data["acc_type"])
-        
-        print(auth_token)
-        message = ''
-        try:
-            url = 'http://127.0.0.1:5002/account'
-            response = requests.put(url, data=account.json(), headers={
-                                    'Authorization': auth_token})
-            log.info("account created:%s", account)
-            message = "account created successfully!"
-        except Exception:
-            log.critical("account service is down")
-            message = "Account service is not working try after some time"
-
-        return {"message": message}, 201
-
-    def cust_parser(self):
-        """adds validations for account registration fields
-
-        Args:
-            parser (parser): parses the request json
-        """
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', required=True, type=str,
-                            help='username cant be blank')
-        parser.add_argument('password', required=True, type=str,
-                            help='password field cannot be blank')
-        parser.add_argument('name', required=True, type=str,
-                            help='name cannot be blank')
-        parser.add_argument('address', required=True, type=str,
-                            help='address cannot be blank')
-        parser.add_argument('state', required=True, type=str,
-                            help='state cannot be blank')
-        parser.add_argument('country', required=True, type=str,
-                            help='country cannot be blank')
-        parser.add_argument('email', required=True, type=str,
-                            help='email cannot be blank')
-        parser.add_argument('pan', required=True, type=str,
-                            help='pan cannot be blank')
-        parser.add_argument('contact', required=True, type=str,
-                            help='contact field cannot be blank')
-        parser.add_argument('dob', required=True, type=str,
-                            help='dob cannot be blank')
-        parser.add_argument('acc_type', required=True, type=str,
-                            help='account type cannot be blank')
-        return parser
 
 
 class UserRegister(Resource):
