@@ -1,7 +1,6 @@
 from resources.security import token_required
 from flask_restful import Resource,reqparse
 from flask import request
-from flask_jwt import jwt_required
 import requests
 import copy
 from models.account import AccountModel

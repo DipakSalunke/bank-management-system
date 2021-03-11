@@ -4,11 +4,11 @@ import requests
 from datetime import datetime
 from models.loan import LoanModel
 from json import dumps
-from flask import request
+from flask import request,jsonify
 
 import logging
 
-logging.basicConfig(filename='record.log', level=logging.DEBUG,
+logging.basicConfig(filename='./src/loan/record.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
 log = logging.getLogger()
 
@@ -53,10 +53,13 @@ class Loan(Resource):
         auth_token = request.headers.get('Authorization', '')
         response = self.check_for_acc(data, auth_token)
         
+        if response == 500:
+            res = {"message":"Account service is not working try after some time"}, response
+            log.info("response %s",res)
+            return res
+        
         log.info("response %s",response.json())
         
-        if response.status_code == 500:
-            return response
         if response.json()["is_present"]:
             message = "Account exists loan acceppted"
             loan.save_to_db()
@@ -70,5 +73,5 @@ class Loan(Resource):
             response = requests.post(url, data={"acc_id": data["acc_id"]}, headers={
                                      'Authorization': auth_token})
         except Exception:
-            return "Account service is not working try after some time", 500
+            return 500
         return response

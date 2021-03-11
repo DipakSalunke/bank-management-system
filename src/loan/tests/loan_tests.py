@@ -73,4 +73,4 @@ class TestLoan:
 
 def clear():
     import os
-    os.remove("./datatest.db")
+    os.remove("./src/loan/datatest.db")

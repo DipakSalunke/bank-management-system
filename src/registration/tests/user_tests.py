@@ -139,4 +139,4 @@ class TestRefresh:
 
 def clear():
     import os
-    os.remove("./datatest.db")
+    os.remove("./src/registration/datatest.db")
