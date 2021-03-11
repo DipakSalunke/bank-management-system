@@ -31,6 +31,26 @@ for testing
 
 check test coverage   
 ```coverage report -m```   
-  
+
+registration service endpoints(port: 5001):
+```
+/register/customer [POST]
+/register/user [POST]
+/user/ispresent [POST]
+/user/<int:user_id> [GET, DELETE]
+/login [POST, GET]
+/refresh [POST]
+/logout [POST]
+```  
+   
+account service endpoints(port: 5002):
+```
+/account [GET, PUT]
+/account/ispresent [POST]
+```
+loan service endpoints(port: 5003):
+```
+/loan [GET, POST]
+```
 
 
