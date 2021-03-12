@@ -5,9 +5,9 @@ from db import db
 from resources.account import Account, AccountCheck
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///account.db"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///account.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["PROPAGATE_EXCEPTIONS"] = True
 
 api = Api(app)
 db.init_app(app)
@@ -21,6 +21,6 @@ def create_tables():
 api.add_resource(Account, "/account")
 api.add_resource(AccountCheck, "/account/ispresent")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     app.run(port=5002, debug=True)

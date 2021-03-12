@@ -4,11 +4,11 @@
 ![bms](bank-management-system.svg)   
    
 ## How to run
-requirements:   
-python3 in cmd   
-install pipenv   
-```pip install pipenv```      
-cd to bank-management-system folder   
+> requirements:   
+    - python3 in cmd   
+    - install pipenv   
+     ```pip install pipenv```      
+    - cd to bank-management-system folder   
 
 ### for run
 install the last successful environment for run   

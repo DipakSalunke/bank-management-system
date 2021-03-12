@@ -1,9 +1,13 @@
 from db import db
+from typing import Dict, List, Union
+
+AccountJSON = Dict[str, Union[float]]
+
 
 class AccountModel(db.Model):
-    
-    __tablename__ = 'accounts'
-    id = db.Column(db.Integer,primary_key=True)
+
+    __tablename__ = "accounts"
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
     name = db.Column(db.String(30))
     address = db.Column(db.String(100))
@@ -14,30 +18,53 @@ class AccountModel(db.Model):
     contact = db.Column(db.String(11))
     dob = db.Column(db.String(20))
     acc_type = db.Column(db.String(20))
-    
-    def __init__(self,username,name,address,state,country,email,pan,contact,dob,acc_type):
+
+    def __init__(
+        self,
+        username: str,
+        name: str,
+        address: str,
+        state: str,
+        country: str,
+        email: str,
+        pan: str,
+        contact: str,
+        dob,
+        acc_type: str,
+    ):
         self.username = username
-        self.name=name 
-        self.address=address 
-        self.state=state 
-        self.country=country 
-        self.email=email 
-        self.pan=pan 
-        self.contact=contact    
-        self.dob=dob
-        self.acc_type=acc_type 
-        
-    def json(self):
-        return {'username':self.username,"name":self.name,"address":self.address,"state":self.state,"country":self.country,"email":self.email,"pan":self.pan,"contact":self.contact,"dob":self.dob,"acc_type":self.acc_type}   
-    
-    def save_to_db(self):
+        self.name = name
+        self.address = address
+        self.state = state
+        self.country = country
+        self.email = email
+        self.pan = pan
+        self.contact = contact
+        self.dob = dob
+        self.acc_type = acc_type
+
+    def json(self) -> AccountJSON:
+        return {
+            "username": self.username,
+            "name": self.name,
+            "address": self.address,
+            "state": self.state,
+            "country": self.country,
+            "email": self.email,
+            "pan": self.pan,
+            "contact": self.contact,
+            "dob": self.dob,
+            "acc_type": self.acc_type,
+        }
+
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
-    
-    @classmethod    
-    def find_by_username(cls,username):
+
+    @classmethod
+    def find_by_username(cls, username: str) -> "AccountModel":
         return cls.query.filter_by(username=username).first()
-    
-    @classmethod    
-    def find_by_id(cls,id):
+
+    @classmethod
+    def find_by_id(cls, id: int) -> "AccountModel":
         return cls.query.filter_by(id=id).first()

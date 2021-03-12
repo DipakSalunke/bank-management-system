@@ -1,8 +1,13 @@
 import requests
 from blacklist import BLACKLIST
 from flask import Response, request
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt, get_jwt_identity, jwt_required)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+)
 from flask_restful import Resource, reqparse
 from models.user import UserModel
 from werkzeug.security import safe_str_cmp
@@ -10,51 +15,68 @@ from werkzeug.security import safe_str_cmp
 # logger configuration
 import logging
 
-logging.basicConfig(filename='./src/registration/registration.log', level=logging.DEBUG,
-                    format=f'%(asctime)s %(levelname)s %(name)s '+__name__+' %(threadName)s : %(message)s')
+logging.basicConfig(
+    filename="./src/registration/registration.log",
+    level=logging.DEBUG,
+    format=f"%(asctime)s %(levelname)s %(name)s "
+    + __name__
+    + " %(threadName)s : %(message)s",
+)
 log = logging.getLogger("user_log")
 
-
+BLANK_ERROR = "'{}' cannot be blank."
+USER_ALREADY_EXISTS = "A user with that username already exists"
+USER_CREATED = "User created successfully"
+USER_NOT_FOUND = "User not found"
+ADMIN_ERROR = "Admin privilege required."
+ADM_DELETE = "admin can't be deleted"
+USER_DELETED = "User deleted."
+INVALID_CREDS = "Invalid credentials"
+USER_LOGGED_OUT = "User <id={}> Successfully logged out."
 # request parser for user
 _user_parser = reqparse.RequestParser()
-_user_parser.add_argument('username', required=True, type=str,
-                          help='username cannot be blank')
-_user_parser.add_argument('password', required=True, type=str,
-                          help='password field cannot be blank')
+_user_parser.add_argument(
+    "username", required=True, type=str, help=BLANK_ERROR.format("username")
+)
+_user_parser.add_argument(
+    "password", required=True, type=str, help=BLANK_ERROR.format("password")
+)
 
 
 class UserRegister(Resource):
-
-    def post(self):
+    @classmethod
+    def post(cls):
         """registers a new user in the system
 
         Returns:
             tuple: message and error code
         """
         data = _user_parser.parse_args()
-        if UserModel.find_by_username(data['username']):
-            return {"message": "A user with that username already exists"}, 400
+        if UserModel.find_by_username(data["username"]):
+            return {"message": USER_ALREADY_EXISTS}, 400
         user = UserModel(data["username"], data["password"])
         user.save_to_db()
         log.info("user created:%s", user.json())
-        return {"message": "User created successfully"}, 201
+        return {"message": USER_CREATED}, 201
 
 
 class UserCheck(Resource):
     parser = reqparse.RequestParser()
 
-    parser.add_argument('username', required=True, type=str,
-                        help='username cannot be blank')
+    parser.add_argument(
+        "username", required=True, type=str, help=BLANK_ERROR.format("username")
+    )
 
+    @classmethod
     @jwt_required()
-    def post(self):
+    def post(cls):
         """checks if username is present in the db
 
         Returns:
             tuple: message if present or not and return status code
         """
         data = UserCheck.parser.parse_args()
-        user = UserModel.find_by_username(data['username'])
+        user = UserModel.find_by_username(data["username"])
         if user:
             log.info("user present:%s", user)
             return {"is_present": True}, 200
@@ -64,10 +86,9 @@ class UserCheck(Resource):
 
 
 class User(Resource):
-
     @classmethod
     @jwt_required(fresh=True)
-    def get(cls, user_id):
+    def get(cls, user_id: int):
         """get the user information of the given user id
 
         Args:
@@ -78,12 +99,12 @@ class User(Resource):
         """
         user = UserModel.find_by_id(user_id)
         if not user:
-            return {'message': 'User not found'}, 404
+            return {"message": USER_NOT_FOUND}, 404
         return user.json(), 200
 
     @classmethod
     @jwt_required(fresh=True)
-    def delete(cls, user_id):
+    def delete(cls, user_id: int):
         """deletes user with provided user ID
 
         Args:
@@ -93,23 +114,22 @@ class User(Resource):
             tuple: message nad status code
         """
         claims = get_jwt()
-        if not claims['is_admin']:
+        if not claims["is_admin"]:
             log.warning("delete user accessed by non admin")
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": ADMIN_ERROR}, 401
         user = UserModel.find_by_id(user_id)
 
         if not user:
-            log.info("user not found for id %s" ,user_id )
-            return {'message': 'User not found'}, 404
+            log.info("user not found for id %s", user_id)
+            return {"message": USER_NOT_FOUND}, 404
 
         if user.id == 1:
-            log.critical(
-                "admin delete operation was requested %s", user.json())
-            return {"message": "admin can't be deleted"}, 400
+            log.critical("admin delete operation was requested %s", user.json())
+            return {"message": ADM_DELETE}, 400
 
         user.delete_from_db()
         log.warning("user deleted %s", user.json())
-        return {'message': 'User deleted.'}, 200
+        return {"message": USER_DELETED}, 200
 
 
 class UserLogin(Resource):
@@ -122,18 +142,17 @@ class UserLogin(Resource):
         """
         data = _user_parser.parse_args()
 
-        user = UserModel.find_by_username(data['username'])
-
-        if user and safe_str_cmp(user.password, data['password']):
+        user = UserModel.find_by_username(data["username"])
+        # authenticate
+        if user and safe_str_cmp(user.password, data["password"]):
+            # identity
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
-            log.info("user %s logged in ! tokens : access %s",
-                     user.username, access_token)
-            return {
-                'access_token': access_token,
-                'refresh_token': refresh_token
-            }, 200
-        return {'message': 'Invalid credentials'}, 401
+            log.info(
+                "user %s logged in ! tokens : access %s", user.username, access_token
+            )
+            return {"access_token": access_token, "refresh_token": refresh_token}, 200
+        return {"message": INVALID_CREDS}, 401
 
     @classmethod
     @jwt_required()
@@ -144,22 +163,25 @@ class UserLogin(Resource):
 
 
 class UserLogout(Resource):
+    @classmethod
     @jwt_required()
-    def post(self):
+    def post(cls):
         """logs the user out of the system by blacklisting the access token
 
         Returns:
             tuple : message and status code
         """
-        jti = get_jwt()["jti"]
+        jti = get_jwt()["jti"]  # jti is "JWT ID", a unique identifier for a JWT.
+        user_id = get_jwt_identity()
         BLACKLIST.add(jti)
         log.info("user with id %s logged out", get_jwt_identity())
-        return {"message": "Successfully logged out."}, 200
+        return {"message": USER_LOGGED_OUT.format(user_id)}, 200
 
 
 class TokenRefresh(Resource):
+    @classmethod
     @jwt_required(refresh=True)
-    def post(self):
+    def post(cls):
         """generates fresh token for the critical endpoint
 
         Returns:
@@ -168,4 +190,4 @@ class TokenRefresh(Resource):
         current_user = get_jwt_identity()
         log.info("user with id %s requested refresh token ", get_jwt_identity())
         new_token = create_access_token(identity=current_user, fresh=False)
-        return {'access_token': new_token}, 200
+        return {"access_token": new_token}, 200

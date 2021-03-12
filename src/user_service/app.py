@@ -3,21 +3,24 @@ from flask_restful import Api
 from datetime import timedelta
 from db import db
 from security import jwt
-from resources.user import (UserRegister,
-                            UserCheck, User,
-                            UserLogin,
-                            TokenRefresh,
-                            UserLogout)
+from resources.user import (
+    UserRegister,
+    UserCheck,
+    User,
+    UserLogin,
+    TokenRefresh,
+    UserLogout,
+)
 
 ACCESS_EXPIRES = timedelta(hours=1)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///user.db"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# flask jwt can raise its own exceptions and errors
-app.config['PROPAGATE_EXCEPTIONS'] = True
-app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["PROPAGATE_EXCEPTIONS"] = True
+app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
+# allow blacklisting for access and refresh tokens
 app.config["JWT_SECRET_KEY"] = "super-secret"
+# could do app.secret_key if we prefer
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 
 api = Api(app)
@@ -42,5 +45,5 @@ api.add_resource(UserLogin, "/user/login")
 api.add_resource(TokenRefresh, "/user/refresh")
 api.add_resource(UserLogout, "/user/logout")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(port=5001, debug=True)
