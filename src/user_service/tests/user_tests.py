@@ -1,51 +1,60 @@
 import pytest
 from db import db
 from app import app
+import json
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///datatest.db"
 db.init_app(app)
 tester = app.test_client()
-headers = ""
-headers_ref = ""
+headers = {"Content-type": "application/json"}
+headers_ref = {"Content-type": "application/json"}
 
-user = {"username": "jen", "password": "jen12"}
-user2 = {"username": "dipak", "password": "dipak12"}
+user = json.dumps({"username": "jen", "password": "jen12"})
+user2 = json.dumps({"username": "dipak", "password": "dipak12"})
+
+
+token_start = "Bearer {}"
 
 
 class TestUserRegister:
     url = "user/register"
 
     def test_post(self):
-        res = tester.post(self.url, data=user)
+        res = tester.post(self.url, data=user, headers=headers)
         assert res.status_code == 201
 
     def test_post_dup(self):
-        res = tester.post(self.url, data=user)
+        res = tester.post(self.url, data=user, headers=headers)
         assert res.status_code == 400
 
     def test_post_check(self):
-        res = tester.post(self.url, data=user2)
+        res = tester.post(self.url, data=user2, headers=headers)
         assert res.status_code == 201
 
 
 class TestUserLogin:
+    url = "/user/login"
+
     def test_auth_success(self):
+
         response = tester.post(
-            "/user/login", json={"username": "dipak", "password": "dipak12"}
+            self.url,
+            json={"username": "dipak", "password": "dipak12"},
+            headers=headers,
         )
         status = response.status_code
         assert status == 200
-        global headers
 
-        headers = {"Authorization": "Bearer {}".format(response.json["access_token"])}
-        global headers_ref
-        headers_ref = {
-            "Authorization": "Bearer {}".format(response.json["refresh_token"])
-        }
+        headers["Authorization"] = token_start.format(response.json["access_token"])
+        headers_ref["Authorization"] = token_start.format(
+            response.json["refresh_token"]
+        )
 
     def test_auth_failed(self):
         response = tester.post(
-            "/user/login", json={"username": "dipakk", "password": "dipak412"}
+            self.url,
+            json={"username": "dipakk", "password": "dipak412"},
+            headers=headers,
         )
         status = response.status_code
         assert status == 401
@@ -94,7 +103,7 @@ class TestUser:
         headers = {"Authorization": "Bearer {}".format(response.json["access_token"])}
         global headers_ref
         headers_ref = {
-            "Authorization": "Bearer {}".format(response.json["refresh_token"])
+            "Authorization": token_start.format(response.json["refresh_token"])
         }
 
     def test_delete(self):

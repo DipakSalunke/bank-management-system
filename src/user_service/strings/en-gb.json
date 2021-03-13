@@ -1,0 +1,15 @@
+{
+"user_already_exists" : "A user with that username already exists.",
+"user_created" : "User created successfully.",
+"user_not_found" : "User not found.",
+"user_admin_error" : "Admin privilege required.",
+"user_adm_delete" : "admin can't be deleted.",
+"user_deleted" : "User deleted.",
+"user_invalid_creds" : "Invalid credentials.",
+"user_logged_out" :"User <id={}> Successfully logged out.",
+
+
+"security_invalid_token_d" : "Signature verification failed.",
+"security_invalid_token_e" :"invalid_token"
+
+}

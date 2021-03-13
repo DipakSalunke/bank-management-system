@@ -1,8 +1,11 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Api
 from datetime import timedelta
+import os
 from db import db
+from ma import ma
 from security import jwt
+from marshmallow import ValidationError
 from resources.user import (
     UserRegister,
     UserCheck,
@@ -25,13 +28,18 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 
 api = Api(app)
 db.init_app(app)
-
+ma.init_app(app)
 # run before the first request to this instance of the application.
 
 
 @app.before_first_request
 def create_tables():
     db.create_all()
+
+
+@app.errorhandler(ValidationError)
+def handle_marshmallow_validation(err):
+    return jsonify(err.messages), 400
 
 
 jwt.init_app(app)

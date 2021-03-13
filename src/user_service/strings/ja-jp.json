@@ -1,0 +1,15 @@
+{
+"user_already_exists" : "ja-JP A user with that username already exists.",
+"user_created" : "ja-JP User created successfully.",
+"user_not_found" : "ja-JP User not found.",
+"user_admin_error" : "ja-JP Admin privilege required.",
+"user_adm_delete" : "ja-JP admin can't be deleted.",
+"user_deleted" : "ja-JP User deleted.",
+"user_invalid_creds" : "ja-JP Invalid credentials.",
+"user_logged_out" :"ja-JP User <id={}> Successfully logged out.",
+
+
+"security_invalid_token_d" : "署名の検証に失敗しました",
+"security_invalid_token_e" :"無効なトークン"
+
+}

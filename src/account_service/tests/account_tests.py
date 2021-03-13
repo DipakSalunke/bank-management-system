@@ -3,6 +3,7 @@ from requests import Response
 from functools import wraps
 from mock import patch
 from db import db
+import json
 
 
 def decorator(f):
@@ -17,7 +18,7 @@ patch("security.token_required", decorator).start()
 
 the_response = Response()
 the_response.status_code = 400
-the_response._content = b'{"is_present": "True"}'
+the_response._content = b'{"is_present": false}'
 
 patch("resources.account.Account.check_for_user", return_value=the_response).start()
 from app import app
@@ -27,7 +28,7 @@ db.init_app(app)
 
 tester = app.test_client()
 
-headers = ""
+headers = {"Content-type": "application/json"}
 account = {
     "username": "dipak",
     "name": "dipak salunke",
@@ -53,6 +54,11 @@ account4 = {
 }
 account4.update(account)
 
+account = json.dumps(account)
+account2 = json.dumps(account2)
+account3 = json.dumps(account3)
+account4 = json.dumps(account4)
+
 
 class TestAccount:
     url = "/account"
@@ -67,6 +73,9 @@ class TestAccount:
         status = response.status_code
         assert status == 400
 
+    the_response._content = b'{"is_present": true}'
+    patch("resources.account.Account.check_for_user", return_value=the_response).start()
+
     def test_create_account_is_a_user(self):
         response = tester.put(self.url, data=account3, headers=headers)
         status = response.status_code
@@ -78,7 +87,9 @@ class TestAccount:
         assert status == 201
 
     def test_get_account(self):
-        response = tester.get(self.url, data={"username": "dipak"}, headers=headers)
+        response = tester.get(
+            self.url, data=json.dumps({"username": "dipak"}), headers=headers
+        )
         status = response.status_code
         assert status == 200
 
@@ -86,7 +97,7 @@ class TestAccount:
 class TestAccountCheck:
     def test_check_account(self):
         response = tester.post(
-            "/account/ispresent", data={"acc_id": 1}, headers=headers
+            "/account/ispresent", data=json.dumps({"acc_id": 1}), headers=headers
         )
         status = response.status_code
         assert status == 200

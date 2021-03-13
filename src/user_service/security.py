@@ -3,7 +3,7 @@ from flask_jwt_extended import JWTManager
 from flask import Flask, jsonify
 
 from blacklist import BLACKLIST
-
+from libs.strings import gettext
 # used to add additional claims when creating a JWT.
 import logging
 
@@ -39,7 +39,7 @@ def check_if_token_in_blocklist(jwt_header, jwt_payload):
 def expire_token_callback(jwt_header, jwt_payload):
     log.warning("expired token was used by user with id %s", jwt_payload["sub"])
     return (
-        jsonify({"description": "The token has expired.", "error": "token_expired"}),
+        jsonify({"description": "The token has expired.", "error":  "token_expired"}),
         401,
     )
 
@@ -52,7 +52,7 @@ def invalid_token_callback(error):
     log.warning("invalid token was used %s", error)
     return (
         jsonify(
-            {"description": "Signature verification falied.", "error": "invalid_token"}
+            {"description": gettext("security_invalid_token_d"), "error": gettext("security_invalid_token_e")}
         ),
         401,
     )

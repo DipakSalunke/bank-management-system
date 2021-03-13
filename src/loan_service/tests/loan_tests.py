@@ -4,6 +4,7 @@ from functools import wraps
 from mock import patch
 from werkzeug.datastructures import Headers
 from db import db
+import json
 
 
 def decorator(f):
@@ -30,12 +31,13 @@ db.init_app(app)
 tester = app.test_client()
 
 loan_details = {
-    "acc_id": "1",
+    "acc_id": 1,
     "loan_type": "education",
     "loan_amt": 34323.5,
     "rate_of_int": 12.3,
     "duration": 4.5,
 }
+headers = {"Content-type": "application/json"}
 
 
 class TestLoan:
@@ -44,24 +46,26 @@ class TestLoan:
     def test_create_loan(self):
         the_response._content = b'{"is_present":true,"username":"test"}'
         check.start()
-        response = tester.post(self.url, data=loan_details)
+        response = tester.post(self.url, data=json.dumps(loan_details), headers=headers)
         status = response.status_code
         assert status == 201
 
     def test_create_loan_not_a_user(self):
         the_response._content = b'{"is_present":false}'
         check.start()
-        response = tester.post(self.url, data=loan_details)
+        response = tester.post(self.url, data=json.dumps(loan_details), headers=headers)
         status = response.status_code
         assert status == 401
 
     def test_get_loan(self):
-        response = tester.get(self.url, data={"acc_id": "1"})
+        response = tester.get(self.url, data=json.dumps({"acc_id": 1}), headers=headers)
         status = response.status_code
         assert status == 200
 
     def test_get_loan_acc_unavailable(self):
-        response = tester.get(self.url, data={"acc_id": "13"})
+        response = tester.get(
+            self.url, data=json.dumps({"acc_id": 13}), headers=headers
+        )
         status = response.status_code
         assert status == 404
         clear()
