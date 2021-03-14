@@ -4,6 +4,7 @@ from app import app
 import json
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///datatest.db"
+app.config["JWT_SECRET_KEY"] = "superrr-secret"
 db.init_app(app)
 tester = app.test_client()
 headers = {"Content-type": "application/json"}

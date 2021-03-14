@@ -1,7 +1,9 @@
+import dotenv
 from flask import Flask, jsonify
 from flask_restful import Api
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
 from db import db
 from ma import ma
 from security import jwt
@@ -14,23 +16,18 @@ from resources.user import (
     TokenRefresh,
     UserLogout,
 )
-
-ACCESS_EXPIRES = timedelta(hours=1)
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///user.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["PROPAGATE_EXCEPTIONS"] = True
-app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
-# allow blacklisting for access and refresh tokens
-app.config["JWT_SECRET_KEY"] = "super-secret"
-# could do app.secret_key if we prefer
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
+
+load_dotenv(verbose=True)
+app.config.from_object("dev_config")
+app.config.from_envvar("APPLICATION_SETTINGS")
 
 api = Api(app)
 db.init_app(app)
 ma.init_app(app)
-# run before the first request to this instance of the application.
 
+# run before the first request to this instance of the application.
+#WSGI Web Server Gateway Interface. prod(uwsgi, uWSGI)  dev(wsgi, werkzeug)
 
 @app.before_first_request
 def create_tables():

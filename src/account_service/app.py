@@ -1,14 +1,15 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from marshmallow import ValidationError
+from dotenv import load_dotenv
 from db import db
 from resources.account import Account, AccountCheck
 from ma import ma
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///account.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["PROPAGATE_EXCEPTIONS"] = True
+load_dotenv(verbose = True)
+app.config.from_object("dev_config")
+app.config.from_envvar("APPLICATION_SETTINGS")
 
 api = Api(app)
 db.init_app(app)

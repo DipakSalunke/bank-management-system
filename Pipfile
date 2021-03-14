@@ -9,6 +9,10 @@ flask-restful = "*"
 flask-sqlalchemy = "*"
 flask-jwt-extended = "*"
 requests = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pytest = "*"
